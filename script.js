@@ -3,6 +3,8 @@ const urlParticipants = 'https://mock-api.driven.com.br/api/vm/uol/participants'
 const urlStatus = 'https://mock-api.driven.com.br/api/vm/uol/status';
 const urlMessage = 'https://mock-api.driven.com.br/api/vm/uol/messages';
 
+let loggedIn = false;
+
 const user = {
     name: ''
 };
@@ -10,8 +12,9 @@ const user = {
 function enterRoom() {
     function nameCheck(check) {
         console.log(check);
+        loggedIn = true;
         keepAlive(); 
-    }
+    }    
 
     function nameError(error) {
         console.log(error);
@@ -33,6 +36,7 @@ function enterRoom() {
 }
 
 function keepAlive() {
+    if (!loggedIn) return;
     setInterval(() => {
         axios.post(urlStatus, user)
             .then(response => {
@@ -49,6 +53,8 @@ enterRoom();
 const MAX_MESSAGES = 100;
 
 function getMessages() {
+   if (!loggedIn) return;
+
   axios.get(urlMessage)
     .then(response => {
       const messages = response.data.slice(-MAX_MESSAGES);
@@ -57,15 +63,22 @@ function getMessages() {
       messagesList.innerHTML = '';
 
       messages.forEach(message => {
+        let messageHTML;
+        
         if (message.type === 'status') {
-          const messageHTML = `<li data-test="message" class="message-item status-message"><span>(${message.time})</span> <strong>${message.from}</strong> ${message.text}</li>`;
-          messagesList.innerHTML += messageHTML;
+          messageHTML = `<li data-test="message" class="message-item status"><span>(${message.time})</span> <strong>${message.from}</strong> ${message.text}</li>`;
         } else if (message.type === 'message') {
-          const messageHTML = `<li data-test="message" class="message-item"><span>(${message.time})</span> <strong>${message.from}</strong> para <strong>Todos</strong>: ${message.text}</li>`;
-          messagesList.innerHTML += messageHTML;
+          messageHTML = `<li data-test="message" class="message-item public"><span>(${message.time})</span> <strong>${message.from}</strong> para <strong>Todos</strong>: ${message.text}</li>`;
+        } else if (message.type === 'private_message') {
+          if (message.from === user.name || message.to === user.name) {
+            messageHTML = `<li data-test="message" class="message-item private"><span>(${message.time})</span> <strong>${message.from}</strong> para <strong>${message.to}</strong>: ${message.text}</li>`;
+          } else {
+            messageHTML = `<li data-test="message" class="message-item private hidden"><span>(${message.time})</span> <strong>${message.from}</strong> para <strong>${message.to}</strong>: ${message.text}</li>`;
+          }
         }
+        
+        messagesList.innerHTML += messageHTML;
       });
-
       messagesList.scrollTop = messagesList.scrollHeight;
     })
     .catch(error => {
@@ -81,6 +94,8 @@ const sendButton = document.getElementById("send-button");
 const messageInput = document.getElementById("message-input");
 const messagesList = document.querySelector('.messages');
 let messages = [];
+
+
 
 sendButton.addEventListener("click", () => {
   const message = messageInput.value;
@@ -100,14 +115,13 @@ sendButton.addEventListener("click", () => {
 
   axios.post(urlMessage, data)
     .then(() => {
+      messageInput.value = ""; 
       getMessages();
     })
     .catch(() => {
       window.location.reload();
     });
 });
-
-getMessages();
 
 
 

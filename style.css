@@ -46,7 +46,24 @@ body {
     overflow: auto;
     word-wrap: break-word;
 }
-  
+.status{
+    background-color: #DCDCDC;
+}
+.public{
+    background-color: #FFFFFF;
+}
+.private{
+    background-color: #FFDEDE;
+}
+.message-item.private.hidden {
+    display: none;
+}
+.message-item.private.private-to-me {
+    display: block;
+}
+.message-item.private.private-from-me {
+    display: block;
+}
 strong{
     font-weight: 700;
 }
