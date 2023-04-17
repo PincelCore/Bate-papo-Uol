@@ -46,62 +46,69 @@ function keepAlive() {
 
 enterRoom();
 
-function getMessages() {
-    axios.get(urlMessage)
-      .then(response => {
-        const messages = response.data;
-        const messagesList = document.querySelector('.messages');
-  
-        messagesList.innerHTML = '';
-  
-        messages.forEach(message => {
-          const li = document.createElement('li');
-          const span = document.createElement('span');
-          const strong = document.createElement('strong');
-          const messageText = document.createTextNode(message.text);
-  
-          span.appendChild(document.createTextNode(`(${message.time})`));
-          strong.appendChild(document.createTextNode(message.from));
-          li.appendChild(span);
-          li.appendChild(document.createTextNode(' '));
-          li.appendChild(strong);
-          li.appendChild(document.createTextNode(': '));
-          li.appendChild(messageText);
-  
-          messagesList.appendChild(li);
-        });
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }
+const MAX_MESSAGES = 100;
 
-  setInterval(() => {
-    getMessages();
-  }, 3000);
-  
+function getMessages() {
+  axios.get(urlMessage)
+    .then(response => {
+      const messages = response.data.slice(-MAX_MESSAGES);
+      const messagesList = document.querySelector('.messages');
+
+      messagesList.innerHTML = '';
+
+      messages.forEach(message => {
+        if (message.type === 'status') {
+          const messageHTML = `<li class="message-item status-message"><span>(${message.time})</span> <strong>${message.from}</strong> ${message.text}</li>`;
+          messagesList.innerHTML += messageHTML;
+        } else if (message.type === 'message') {
+          const messageHTML = `<li class="message-item"><span>(${message.time})</span> <strong>${message.from}</strong> para <strong>Todos</strong>: ${message.text}</li>`;
+          messagesList.innerHTML += messageHTML;
+        }
+      });
+
+      messagesList.scrollTop = messagesList.scrollHeight;
+    })
+    .catch(error => {
+      console.error(error);
+    });
+}
+
+setInterval(() => {
+  getMessages();
+}, 3000);
+
 const sendButton = document.getElementById("send-button");
 const messageInput = document.getElementById("message-input");
+const messagesList = document.querySelector('.messages');
+let messages = [];
 
 sendButton.addEventListener("click", () => {
-    const message = messageInput.value;
-    messageInput.value = "";
+  const message = messageInput.value;
+  messageInput.value = "";
 
-    const data = {
-        from: user.name,
-        to: "Todos",
-        text: message,
-        type: "message",
-    };
+  const data = {
+    from: user.name,
+    to: "Todos",
+    text: message,
+    type: "message",
+  };
 
-    axios.post(urlMessage, data)
-        .then(() => {
-            getMessages();
-        })
-        .catch(() => {
-            window.location.reload();
-        });
+  const messageHTML = `<li class="message-item"><span>(${new Date().toLocaleTimeString()})</span> <strong>${data.from}</strong> para <strong>Todos</strong>: ${data.text}</li>`;
+  messagesList.innerHTML += messageHTML;
+  messagesList.scrollTop = messagesList.scrollHeight;
+  messages.push(data);
+
+  axios.post(urlMessage, data)
+    .then(() => {
+      getMessages();
+    })
+    .catch(() => {
+      window.location.reload();
+    });
 });
+
+getMessages();
+
 
 
 

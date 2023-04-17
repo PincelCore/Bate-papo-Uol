@@ -30,17 +30,19 @@ body {
 .content{
     margin-top: 105px;
 }
-.messages{
-    margin-top: 25px;
-    background-color: #DCDCDC;
-
-    height: 40px;
-
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    width: 100%;
+.messages {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}  
+.message-item {
+    margin: 5px 0;
+    padding: 10px;
+    background-color: #FFFFFF;
+    font-size: 14px;
+    line-height: 1.4;
 }
+  
 strong{
     font-weight: 700;
 }
