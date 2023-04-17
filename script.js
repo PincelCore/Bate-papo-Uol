@@ -58,10 +58,10 @@ function getMessages() {
 
       messages.forEach(message => {
         if (message.type === 'status') {
-          const messageHTML = `<li class="message-item status-message"><span>(${message.time})</span> <strong>${message.from}</strong> ${message.text}</li>`;
+          const messageHTML = `<li data-test="message" class="message-item status-message"><span>(${message.time})</span> <strong>${message.from}</strong> ${message.text}</li>`;
           messagesList.innerHTML += messageHTML;
         } else if (message.type === 'message') {
-          const messageHTML = `<li class="message-item"><span>(${message.time})</span> <strong>${message.from}</strong> para <strong>Todos</strong>: ${message.text}</li>`;
+          const messageHTML = `<li data-test="message" class="message-item"><span>(${message.time})</span> <strong>${message.from}</strong> para <strong>Todos</strong>: ${message.text}</li>`;
           messagesList.innerHTML += messageHTML;
         }
       });
